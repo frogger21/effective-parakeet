@@ -155,7 +155,7 @@ int main(){
 	const int nVertices = 4; //# of vertices
 	const int sVertex = 1; //the source vertex
 	vertex *G = new vertex[nVertices]; //graph network
-	const string infile = "D:/coursera/stanford data struc and algos/5/a1.txt";
+	const string infile = "D:/a1.txt";
 	
 	//read file: each row: A B edgeLength; where: A->B with length edgeLength
 	ifstream inputFile; 
