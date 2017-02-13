@@ -248,7 +248,7 @@ void dijkstraJHeap(vertex *G, const int &n, const int &source) {
 }
 
 int main() {
-	const string readfile = "D:/coursera/stanford data struc and algos/5/dijkstraData.txt";
+	const string readfile = "D:/dijkstraData.txt";
 	const long nVertices = 200; //# of vertices
 	int sVertex = 1;
 	vertex *G = new vertex[nVertices]; //graph network
