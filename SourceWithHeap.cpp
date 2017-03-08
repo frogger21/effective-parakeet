@@ -9,8 +9,13 @@ using namespace std;
 // CUSTOM HEAP
 //*************
 template <typename T2>
-bool compare(T2 &A, T2 &B) {
+bool comparemax(T2 &A, T2 &B) {
 	return A < B;  //max heap
+}
+
+template <typename T22>
+bool comparemin(T22 &A, T22 &B) {
+	return A > B;  //min heap
 }
 
 template <typename T4, typename Pred4>
@@ -25,6 +30,7 @@ void j_swimheap(vector<T1> &p, int N, int k, Pred1 predicate) {
 	T1 temp;
 	while (k > 1 && (predicate(p[k / 2], p[k]))) {
 		temp = p[k];
+		p[k] = p[k / 2];
 		p[k / 2] = temp;
 		k = k / 2;
 	}
@@ -74,8 +80,7 @@ struct edgeMin {
 
 //parses string line and looks for numbers to put into a list
 //ignores all non number ascii
-void split(string line, vector<int> &v)
-{
+void split(string line, vector<int> &v){
 	string::size_type sz;
 	int NumCount = 0;
 	int startPos, numLen, tracker, StringSize;
@@ -84,41 +89,31 @@ void split(string line, vector<int> &v)
 	bool Num = false;
 	bool temp = false;
 	bool temp2 = false;
-	for (int i = 0; i < StringSize; i++)
-
-	{
+	for (int i = 0; i < StringSize; i++){
 		//is it a number?
 		temp = false;
-		if (line[i] >= 48 && line[i] <= 57)
-		{
+		if (line[i] >= 48 && line[i] <= 57){
 			temp = true;
 		}
 		//if it's not a number then 
-		if (temp == false)
-		{
+		if (temp == false){
 			Num = false;
 		}
 		//previous char was not a number but current is: we got a new number
-		if (Num == false && temp == true)
-		{
+		if (Num == false && temp == true){
 			Num = true;
 			startPos = i;
 			numLen = 1; //we don't know yet fully
 			tracker = i + 1;
-			while (tracker < StringSize)
-			{
+			while (tracker < StringSize){
 				temp2 = false;
-				if (line[tracker] <= 57 && line[tracker] >= 48)
-				{
+				if (line[tracker] <= 57 && line[tracker] >= 48){
 					temp2 = true;
 				}
-				if (temp2 == true)
-				{
+				if (temp2 == true){
 					numLen += 1;
 					tracker++;
-				}
-				else
-				{
+				} else {
 					// don't need to check these anymore cuz we already know 
 					//it's # -1 b/c we i++ in for loop
 					i += numLen - 1;
@@ -148,10 +143,15 @@ void dijkstra(vertex *G, const int &n, const int &source) {
 	//input: directed graph G=(V,E), V = vertices, E = edges
 	set<int> X; X.insert(source); //X = vertices processed so far
 	set<int> V; //set of vertices of graph G
-	for (int i = 1; i <= n; i++) { V.insert(i); }
+	for (int i = 1; i <= n; i++) {
+		V.insert(i);
+	}
+
 	double *A = new double[n];  A[source - 1] = 0; //computed shortest path distances
-	for (int i = 1; i < n; i++) { A[i] = INFINITY; } //initialize as infinity
-													 //need to grow X by one node
+	for (int i = 1; i < n; i++) {
+		A[i] = INFINITY;
+	} //initialize as infinity
+	
 	int v, w;
 	double d;
 	while (X != V) {
@@ -207,6 +207,7 @@ void dijkstraJHeap(vertex *G, const int &n, const int &source) {
 	//assume A[0] = NULL so vertices n is from A[1] to A[n]
 	edgeMin temp1; temp1.length = NULL; temp1.wStar = NULL;
 	vector<edgeMin> minHeap; //this is our minheap represented by vector
+	double *storage = new double[n];
 	minHeap.push_back(temp1); //NULL
 	temp1.length = 0; temp1.wStar = source;
 	minHeap.push_back(temp1);
@@ -216,6 +217,7 @@ void dijkstraJHeap(vertex *G, const int &n, const int &source) {
 			minHeap.push_back(temp1);
 		}
 	}
+
 	//heapify it
 	j_heapify(minHeap,n,compare2);
 	int len = n;
@@ -227,28 +229,36 @@ void dijkstraJHeap(vertex *G, const int &n, const int &source) {
 		minHeap[1] = minHeap[minHeap.size() - 1]; //switch places
 		minHeap.pop_back(); //pop the back now
 		len -= 1;
+		storage[temp1.wStar - 1] = temp1.length;
 		//restore heap order
 		u = temp1.wStar; uLen = temp1.length;
 		j_sinkheap(minHeap,len,1,compare2); //top is now from back so sink it
-		cout << "s --> v, (" << source << ") --> (" << u << "), SP = " << uLen << endl;
+		//cout << "s --> v, (" << source << ") --> (" << u << "), SP = " << uLen << endl;
 		//explore its neighbours
 		for (int i2 = 0; i2 < G[u - 1].connections.size(); i2++) {
 			v = G[u - 1].connections[i2].vertex;
 			temp1.wStar = v; temp1.length = G[u - 1].connections[i2].length;
-			pos = find_heap(minHeap, v);
+			pos = find_heap(minHeap, v); // O(n)
 			if (pos != -1) {
 				//it exists in minHeap
 				if (minHeap[pos].length > (uLen + temp1.length)) {
 					minHeap[pos].length = uLen + temp1.length;
-					j_heapify(minHeap,len, compare2);
+					storage[pos - 1] = uLen + temp1.length;
+					//we already know position, so don't need to do O(n) to find it
+					j_swimheap(minHeap, len, pos, compare2); //this is O(logN);			
 				}
 			}
 		}
 	}
+	
+	for (int i = 0; i < n; i++) {
+		std::cout << "s --> v, (" << source << ") --> (" << i + 1 << "), SP = " << storage[i] << endl;
+	}
+	delete[] storage;
 }
 
 int main() {
-	const string readfile = "D:/dijkstraData.txt";
+	const string readfile = "D:/coursera/stanford data struc and algos/5/dijkstraData.txt";
 	const long nVertices = 200; //# of vertices
 	int sVertex = 1;
 	vertex *G = new vertex[nVertices]; //graph network
@@ -256,6 +266,7 @@ int main() {
 	string line;
 	vector<int>temp;
 	edge temp2;
+	
 	ifstream inputFile;
 	inputFile.open(readfile);
 	if (inputFile.is_open()) {
@@ -267,11 +278,9 @@ int main() {
 			for (int i = 1; i < temp.size(); i += 2) {
 				temp2.vertex = temp[i];
 				temp2.length = temp[i + 1];
-				//cout << temp[i + 1] << endl;
 				G[vertex - 1].connections.push_back(temp2);
 				count += 1;
 			}
-			//cout << vertex << endl;
 			temp.clear();
 		}
 		inputFile.close();
@@ -291,6 +300,38 @@ int main() {
 	cout << "Dijkstra with custom heap!\n";
 	dijkstraJHeap(G,nVertices,sVertex);
 
+	/*
+	cout << "Testing Heap\n";
+	vector<int> heap1;
+	heap1.push_back(NULL);
+	heap1.push_back(37); //1
+	heap1.push_back(35); 
+	heap1.push_back(50);
+	heap1.push_back(40);
+	heap1.push_back(29);
+	heap1.push_back(30);
+	heap1.push_back(38);
+	heap1.push_back(25);
+	heap1.push_back(20); //9
+	j_heapify(heap1, 9, comparemin<int>);
+	cout << "Initial heap\n";
+	for (int i = 1; i < 10; i++) {
+		cout << heap1[i] << ", ";
+	}
+	cout << endl;
+	
+	//values change for value 38 last value
+	heap1[9] = 11;
+	j_swimheap(heap1, 9, 9, comparemin<int>);
+	//j_heapify(heap1, 9, comparemin<int>);
+	cout << "After swim heap\n";
+	for (int i = 1; i < 10; i++) {
+		cout << heap1[i] << ", ";
+	}
+	cout << endl;
+	*/
+
+	delete[] G;
 	system("PAUSE");
 	return 0;
 }
