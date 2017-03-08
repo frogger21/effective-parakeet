@@ -233,7 +233,6 @@ void dijkstraJHeap(vertex *G, const int &n, const int &source) {
 		//restore heap order
 		u = temp1.wStar; uLen = temp1.length;
 		j_sinkheap(minHeap,len,1,compare2); //top is now from back so sink it
-		//cout << "s --> v, (" << source << ") --> (" << u << "), SP = " << uLen << endl;
 		//explore its neighbours
 		for (int i2 = 0; i2 < G[u - 1].connections.size(); i2++) {
 			v = G[u - 1].connections[i2].vertex;
@@ -258,7 +257,7 @@ void dijkstraJHeap(vertex *G, const int &n, const int &source) {
 }
 
 int main() {
-	const string readfile = "D:/coursera/stanford data struc and algos/5/dijkstraData.txt";
+	const string readfile = "D:/dijkstraData.txt";
 	const long nVertices = 200; //# of vertices
 	int sVertex = 1;
 	vertex *G = new vertex[nVertices]; //graph network
@@ -299,38 +298,7 @@ int main() {
 
 	cout << "Dijkstra with custom heap!\n";
 	dijkstraJHeap(G,nVertices,sVertex);
-
-	/*
-	cout << "Testing Heap\n";
-	vector<int> heap1;
-	heap1.push_back(NULL);
-	heap1.push_back(37); //1
-	heap1.push_back(35); 
-	heap1.push_back(50);
-	heap1.push_back(40);
-	heap1.push_back(29);
-	heap1.push_back(30);
-	heap1.push_back(38);
-	heap1.push_back(25);
-	heap1.push_back(20); //9
-	j_heapify(heap1, 9, comparemin<int>);
-	cout << "Initial heap\n";
-	for (int i = 1; i < 10; i++) {
-		cout << heap1[i] << ", ";
-	}
-	cout << endl;
 	
-	//values change for value 38 last value
-	heap1[9] = 11;
-	j_swimheap(heap1, 9, 9, comparemin<int>);
-	//j_heapify(heap1, 9, comparemin<int>);
-	cout << "After swim heap\n";
-	for (int i = 1; i < 10; i++) {
-		cout << heap1[i] << ", ";
-	}
-	cout << endl;
-	*/
-
 	delete[] G;
 	system("PAUSE");
 	return 0;
