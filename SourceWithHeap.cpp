@@ -5,9 +5,9 @@
 #include <set>
 using namespace std;
 
-//*************
-// CUSTOM HEAP
-//*************
+//****************************************************************************
+// CUSTOM HEAP: find pesudocode from Algorithms 4th edition Sedgewick & Wayne
+//****************************************************************************
 template <typename T2>
 bool comparemax(T2 &A, T2 &B) {
 	return A < B;  //max heap
